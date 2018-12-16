@@ -72,7 +72,7 @@ time_format: HH:mm:ss
 
 # Pagination
 ## Set per_page to 0 to disable pagination
-per_page: 10
+per_page: 20
 pagination_dir: page
 
 # Extensions
@@ -97,9 +97,6 @@ deploy:
 - type: baidu_url_submitter #百度站长主动提交
 - type: git
   repo: git@github.com:JizxGit/jizxgit.github.io.git
-  branch: master
-- type: git
-  repo: git@git.dev.tencent.com:jizx/jizx.git
   branch: master
 - type: git
   repo: git@git.dev.tencent.com:jizx/jizx.coding.me.git
