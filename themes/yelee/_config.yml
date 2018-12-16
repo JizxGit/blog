@@ -121,7 +121,7 @@ youyan:
 background_image: 5
 
 # Base Font Size | 字号调节
-base_font_size: 16  #px, 16 - 24
+base_font_size: 14  #px, 16 - 24
 
 ## General Color Scheme | 主题配色方案 
 ## 可用值 Value: yilia
@@ -129,7 +129,7 @@ color_scheme:
 
 highlight_style:
   on: true
-  inline_code: 8  # Value: 0 - 9 可选
+  inline_code: 2  # Value: 0 - 9 可选
   code_block: 0  # Value: 0 - 4 
   # Set inline_code to style highlight text
   # Chose a highlight theme for code block
@@ -245,7 +245,7 @@ mathjax: true
 
 # Socail Share | 是否开启分享
 share: 
-  on: true
+  on: false
   baidu: true
   addthis: false
   addthis_pubid: "ra-56ff76c972fc0cf9"
