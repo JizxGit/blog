@@ -18,7 +18,7 @@ window添加右键功能，如用atom打开，用vs code打开，可以方便用
 
 使用`regedit` 打开注册表，找到如下位置，按照图示添加项，即可
 
-![图像 001](F:\Data\Blog\source\_posts\2018-12-15-window添加右键用atom打开\图像 001.png)
+![图像 001](./图像 001.png)
 
-![图像 002](F:\Data\Blog\source\_posts\2018-12-15-window添加右键用atom打开\图像 002.png)
+![图像 002](./图像 002.png)
 
