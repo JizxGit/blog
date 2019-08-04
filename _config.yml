@@ -3,7 +3,7 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Jizx的博客
+title:  玖玖的博客
 subtitle: 个人学习笔记，各种杂杂碎碎O(∩_∩)O
 keywords: java,python,linux,javascript
 description:
@@ -18,7 +18,7 @@ widgets:
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: http://jizx.top
+url: https://jizx.top
 root: /
 permalink: :year/:month/:day/:title/
 permalink_defaults:
