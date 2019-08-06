@@ -100,11 +100,8 @@ logging.critical("critical")
 注意点：
 
 - `logging.basicConfig()`函数是一个一次性的简单配置工具使，也就是说**只有在第一次调用该函数时会起作用**，后续再次调用该函数时完全不会产生任何操作的，多次调用的设置并不是累加操作。
-
 - 日志器（Logger）是有层级关系的，上面调用的logging模块级别的函数所使用的日志器是`RootLogger`类的实例，其名称为'root'，它是处于日志器层级关系最顶层的日志器，且**该实例是以单例模式存在的**。
-
 - 如果要记录的日志中包含变量数据，可使用一个格式字符串作为这个事件的描述消息（`logging.debug`、`logging.info`等函数的第一个参数），然后将变量数据作为第二个参数`*args`的值进行传递，如下:
-
   ```
   logging.warning('%s is %d years old.', 'Tom', 10)
   # WARNING:root:Tom is 10 years old.
