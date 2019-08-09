@@ -1,7 +1,8 @@
 ---
-title: jupyter使用与设置
+title: anaconda与jupyter的使用和设置
 tags:
   - python
+  - anaconda
   - jupyter
   - 右键
   - 效率
