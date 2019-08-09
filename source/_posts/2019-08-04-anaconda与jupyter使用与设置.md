@@ -54,8 +54,8 @@ conda install numpy scipy pandas  " 安装多个包
 conda install numpy=1.10 					" 指定所需的包版本
 conda remove package_name					" 卸载包
 conda update package_name					" 更新包
-conda update --all								" 更新环境中的所有包（这样做常常很有用）
-conda list												" 列出已安装的包
+conda update --all							" 更新环境中的所有包（这样做常常很有用）
+conda list									" 列出已安装的包
 conda search search_term 					" 如果不知道要找的包的确切名称，可以尝试进行搜索 
 ```
 
@@ -63,23 +63,24 @@ conda search search_term 					" 如果不知道要找的包的确切名称，可
 
 ```bash
 " 查看环境
-conda env list 															" 列出你创建的所有环境
-conda info -e																" 列出你创建的所有环境
-conda info																	" 显示当前环境的全部相关信息
+conda env list 								" 列出你创建的所有环境
+conda info -e								" 列出你创建的所有环境
+conda info									" 显示当前环境的全部相关信息
 
 " 编辑环境
 conda create -n env_name python=3.4 pandas 	" 创建环境 ，-n 是指名称
-conda env remove -n env_name --all					" 删除指定的环境
+conda env remove -n env_name --all			" 删除指定的环境
+conda create -n new_env --clone old_name 	" 克隆环境，实现重命名
 
 " 激活/退出环境
-activate my_env  														" 激活环境 window
-source activate my_env 											" 激活环境 OSX/Linux
-deactivate																	" 退出环境 window
-source deactivate 													" 退出环境 OSX/Linux
+activate my_env  							" 激活环境 window
+source activate my_env 						" 激活环境 OSX/Linux
+deactivate									" 退出环境 window
+source deactivate 							" 退出环境 OSX/Linux
 
 " 导出环境信息文件，利用文件信息克隆环境
-conda env export > environment.yaml 				" 将包保存为YAML，共享此文件，而且其他人能够用于创建和你项目相同的环境
-conda env create -f environment.yaml				" 利用环境文件创建相同环境
+conda env export > environment.yaml 		" 将包保存为YAML，共享此文件，而且其他人能够用于创建和你项目相同的环境
+conda env create -f environment.yaml		" 利用环境文件创建相同环境
 ```
 
 > 对于不使用 conda 的用户，可以使用命令`pip freeze> pip_requirements.txt `（[详情](https://pip.pypa.io/en/stable/reference/pip_freeze/)）将一个 pip_requirements.txt 文件导出并包括在其中。
