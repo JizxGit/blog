@@ -2,7 +2,8 @@
 title: python模块-logging
 tags:
   - logging
-  - python
+  - python 
+  - 工具
 categories:
   - python
 date: 2019-08-06 14:32:08
