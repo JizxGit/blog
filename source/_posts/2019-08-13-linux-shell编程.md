@@ -1632,3 +1632,38 @@ gnudate() {
 
 
 
+
+
+## 最佳实践
+
+```shell
+#!/usr/bin/env bash
+# Bash3 Boilerplate. Copyright (c) 2014, kvz.io
+
+set -o errexit
+set -o pipefail
+set -o nounset
+# set -o xtrace
+
+# Set magic variables for current file & dir
+__dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+__file="${__dir}/$(basename "${BASH_SOURCE[0]}")"
+__base="$(basename ${__file} .sh)"
+__root="$(cd "$(dirname "${__dir}")" && pwd)" # <-- change this as it depends on your app
+
+arg1="${1:-}"
+```
+
+
+
+1.  使用长的参数名，以便增加可读写，除非在命令行中简短的参数更快速 (`logger --priority` vs `logger -p`).
+2.  `set -o errexit` (a.k.a `set -e`) 让脚本在**运行出错**时退出，而不会继续执行下去
+3.  `set -o nounset` (a.k.a. `set -u`)让脚本在使用了**未声明变量**时退出.
+4.  `set -o xtrace` (a.k.a `set -x`) 用于 debug
+5.  `set -o pipefail` 用于捕获管道命令的出错，比如捕获 mysqldump 的在`mysqldump |gzip`中出现的错误
+6.  `#!/usr/bin/env bash` 比 `#!/bin/bash`更有兼容性。
+7.  用`{}`括起你的变量
+8.  You don't need two equal signs when checking `if [ "${NAME}" = "Kevin" ]`. TODO
+9.  在脚本的头部定义魔法变量、basename、目录等等。
+
+参考:https://kvz.io/bash-best-practices.html
