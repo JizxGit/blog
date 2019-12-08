@@ -440,6 +440,8 @@ fnmatchcase('foo.txt', '*.TXT')
 # False
 ```
 
+
+
 ### 正则表达式匹配字符串
 
 如果你想匹配的是字面字符串，那么你通常只需要调用<u>基本字符串方法</u>就行， 比如 `str.find()` , `str.endswith()` , `str.startswith()` 或者类似的方法。
@@ -1096,4 +1098,437 @@ with open('/etc/passwd') as f:
 ```
 
 
+
+## 文件与 IO
+
+### TODO 5.4，5.6， 5.8，5.9，5.10，5.18, 5.20(略)
+
+
+
+ 
+
+### 读写文本文件
+
+#### `rt,wt,at`模式
+
+使用带`t`的模式，文件的读写操作默认使用系统编码，可以通过调用 `sys.getdefaultencoding()` 来得到。 在大多数机器上面都是utf-8编码。
+
+```python
+with open('somefile.txt', 'rt') as f:
+    for line in f:
+        # process line
+        ...
+
+with open('somefile.txt', 'wt') as f:
+    f.write(text1)
+    f.write(text2)
+```
+
+#### `x`模式，文件不存在才能写入
+
+>   x模式是一个Python3对 `open()` 函数特有的扩展。 在Python的旧版本或者是Python实现的底层C函数库中都是没有这个模式的。
+
+可以在 `open()` 函数中使用 `x` 模式来代替 `w` 模式的方法来解决这个问题。比如：
+
+```
+>>> with open('somefile', 'wt') as f:
+...     f.write('Hello\n')
+...
+>>> with open('somefile', 'xt') as f:
+...     f.write('Hello\n')
+...
+Traceback (most recent call last):
+File "<stdin>", line 1, in <module>
+FileExistsError: [Errno 17] File exists: 'somefile'
+>>>
+```
+
+如果文件是二进制的，使用 `xb` 来代替 `xt`
+
+
+
+#### 文件对象的属性
+
+```python
+with open("1.txt",'rt') as f:
+	print(f.name) # 读取的文件名
+	print(f.mode) # 读取模式
+	print(f.encoding) # 读取编码
+	print(f.errors) # 编码错误时的处理方式，默认是‘strict’
+
+```
+
+
+
+
+
+
+
+#### python3 中的`newline`
+
+默认情况下，Python会以统一模式处理换行符，识别所有的普通换行符并将其转换为单个 `\n` 字符。
+
+如果你不想要这种默认的处理方式，可以给 `open()` 函数传入参数 `newline=''`，**注意，这不是清除换行符的作用**
+
+```python
+>>> # 启用 Newline 转换
+>>> f = open('hello.txt', 'rt')
+>>> f.read()
+'hello world!\n'
+
+>>> # 禁用 Newline 转换 
+>>> g = open('hello.txt', 'rt', newline='')
+>>> g.read()
+'hello world!\r\n'
+```
+
+
+
+### 打印到文件中,参数`file`
+
+在 `print()` 函数中指定 `file` 关键字参数，像下面这样，文件必须是**以文本模式打开**。 
+
+```python
+with open('d:/work/test.txt', 'wt') as f:
+    print('Hello World!', file=f)
+```
+
+
+
+
+
+### 指定打印分隔符或行终止符
+
+可以使用在 `print()` 函数中使用 `sep` 和 `end` 关键字参数，以你想要的方式输出。
+
+```python
+>>> print('ACME', 50, 91.5)
+ACME 50 91.5
+>>> print('ACME', 50, 91.5, sep=',')
+ACME,50,91.5
+>>> print('ACME', 50, 91.5, sep=',', end='!!\n')
+ACME,50,91.5!!
+```
+
+有时候你会看到一些程序员会使用 `str.join()` 来完成同样的事情。比如：
+
+```python
+>>> print(','.join(('ACME','50','91.5')))
+ACME,50,91.5
+```
+
+`str.join()` 的问题在于它仅仅适用于字符串，如果列表中有数值，就需要另外的转换。
+
+你当然可以不用那么麻烦，只需要像下面这样写：
+
+```python
+>>> print(*row, sep=',')
+ACME,50,91.5
+```
+
+
+
+### 读写压缩文件
+
+如下，所有的I/O操作都使用文本模式并执行Unicode的编码/解码。 类似的，如果你想操作二进制数据，使用 `rb` 或者 `wb` 文件模式即可。
+
+```python
+# gzip compression
+import gzip
+with gzip.open('somefile.gz', 'rt') as f:
+    text = f.read()
+
+# bz2 compression
+import bz2
+with bz2.open('somefile.bz2', 'rt') as f:
+    text = f.read()
+```
+
+>   如果你不指定模式，那么默认的就是二进制模式。
+
+
+
+**参数**
+
+`gzip.open()` 和 `bz2.open()` 接受跟内置的 `open()` 函数一样的参数， 包括 `encoding`，`errors`，`newline` 等等。
+
+当写入压缩数据时，可以使用 `compresslevel` 这个可选的关键字参数来指定一个压缩级别。比如：
+
+```python
+with gzip.open('somefile.gz', 'wt', compresslevel=5) as f:
+    f.write(text)
+```
+
+默认的等级是9，也是最高的压缩等级。等级越低性能越好，但是数据压缩程度也越低。
+
+
+
+**特性**
+
+最后一点，  它们可以作用在一个已存在并以二进制模式打开的文件上。比如，下面代码是可行的：
+
+```python
+import gzip
+f = open('somefile.gz', 'rb')
+with gzip.open(f, 'rt') as g:
+    text = g.read()
+```
+
+这样就允许 `gzip` 和 `bz2` 模块可以工作在许多类文件对象上，比如套接字，管道和内存中文件等。
+
+
+
+### 文件、路径操作
+
+#### 路径名操作
+
+请看 [Python 小模块的 os.path](http://localhost:4000/2019/08/06/python小模块/#os-path)
+
+#### 测试文件
+
+请看 [Python 小模块的 os.path](http://localhost:4000/2019/08/06/python小模块/#os-path)
+
+#### 文件列表
+
+列出指定目录下的全部文件和目录，非递归获取。
+
+>   函数 `os.listdir()` 返回的实体列表会根据系统默认的文件名编码来解码。 但是有时候也会碰到一些不能正常解码的文件名，请参考下一节
+
+```python
+import os.path
+
+names = os.listdir('somedir')
+
+# 获取文件
+filenames = [name for name in names
+        if os.path.isfile(os.path.join('somedir', name))]
+
+# 获取目录
+dirnames = [name for name in names
+        if os.path.isdir(os.path.join('somedir', name))]  
+```
+
+
+
+获取某类文件
+
+```python
+# 方法 1：字符串简单匹配
+import os
+names = os.listdir('somedir')
+pyfiles = [name for name in os.listdir('somedir')
+            if name.endswith('.py')]
+
+# 方法 2：fnmatch 模块
+from fnmatch import fnmatch
+pyfiles = [name for name in os.listdir('somedir')
+            if fnmatch(name, '*.py')]
+
+# 方法 3：glob 模块 推荐
+import glob
+pyfiles = glob.glob('somedir/*.py')
+```
+
+
+
+### 文件名编码
+
+通常来讲，你不需要担心文件名的编码和解码，普通的文件名操作应该就没问题了。
+
+**字符串表示文件名（默认情况）**
+
+默认情况下，所有的文件名都会根据 `sys.getfilesystemencoding()` 返回的文本编码来编码或解码
+
+**原始字节字符串表示文件名**
+
+如果因为某种原因你想忽略这种编码，可以使用一个**原始字节字符串来指定一个文件名**即可。
+
+```python
+>>> # 创建一个unicode编码的文件
+>>> with open('jalape\xf1o.txt', 'w') as f:
+...     f.write('Spicy!')
+...
+6
+>>> # 打印目录 (默认进行解码ecoded)
+>>> import os
+>>> os.listdir('.')
+['jalapeño.txt']
+
+>>> # 打印目录 (使用原始字节字符串)
+>>> os.listdir(b'.') 	# 通过传递 字节字符串 来提示 Python 不要解码
+[b'jalapen\xcc\x83o.txt']
+
+>>> # Open file with raw filename
+>>> with open(b'jalapen\xcc\x83o.txt') as f:
+...     print(f.read())
+...
+Spicy!
+```
+
+
+
+#### 打印不合法的文件名
+
+默认情况下，Python假定所有文件名都已经根据 `sys.getfilesystemencoding()` 的值编码过了。 但是，有一些文件系统并没有强制要求这样做，因此允许创建文件名没有正确编码的文件。 
+
+操作不合法的文件名或者将文件名传递给 `open()` 这样的函数时，一切都能正常工作。 **只有当你想要输出文件名时才会碰到些麻烦**(比如打印输出到屏幕或日志文件等)。 
+
+```python
+>>> import os
+>>> files = os.listdir('.')
+>>> files
+['spam.py', 'b\udce4d.txt', 'foo.txt']
+>>> for name in files:
+...     print(name)
+...
+spam.py
+Traceback (most recent call last):
+    File "<stdin>", line 2, in <module>
+UnicodeEncodeError: 'utf-8' codec can't encode character '\udce4' in
+position 1: surrogates not allowed
+>>>
+```
+
+**解决方法**
+
+```python
+# 方法 1，简单处理
+def bad_filename(filename):
+    return repr(filename)[1:-1]
+# 方法 2，以正确的编码进行解码
+def bad_filename(filename):
+    # filename 是 unicode 码，因此先进行编码，最后再解码
+    temp = filename.encode(sys.getfilesystemencoding(), errors='surrogateescape')
+    return temp.decode('latin-1')
+
+for name in files:
+     try:
+         print(name)
+     except UnicodeEncodeError:
+         print(bad_filename(name))
+
+spam.py
+bäd.txt
+foo.txt
+```
+
+>   `surrogateescape`:
+>   这种是Python在绝大部分面向OS的API中所使用的错误处理器，
+>   它能以一种优雅的方式处理由操作系统提供的数据的编码问题。
+>   在解码出错时会将出错字节存储到一个很少被使用到的Unicode编码范围内。
+>   在编码时将那些隐藏值又还原回原先解码失败的字节序列。
+>   它不仅对于OS API非常有用，也能很容易的处理其他情况下的编码错误。
+
+
+
+### 文件对象的层次结构
+
+I/O系统由一系列的层次构建而成。你可以试着运行下面这个操作一个文本文件的例子来查看这种层次：
+
+```python
+>>> f = open('sample.txt','w')
+>>> f
+<_io.TextIOWrapper name='sample.txt' mode='w' encoding='UTF-8'>
+>>> f.buffer
+<_io.BufferedWriter name='sample.txt'>
+>>> f.buffer.raw
+<_io.FileIO name='sample.txt' mode='wb'>
+```
+
+1.  `io.TextIOWrapper` 是一个编码和解码Unicode的文本处理层，增加或改变文本编码会涉及这一层。
+
+2.  `io.BufferedWriter` 是一个处理二进制数据的带缓冲的I/O层。
+3.   `io.FileIO` 是一个表示操作系统底层文件描述符的原始文件。
+
+
+
+如果你想**修改一个已经打开的文本模式的文件的编码方式**(暂时不知道有什么用途)，可以先使用 `detach()` 方法移除掉已存在的文本编码层， 并使用新的编码方式代替。`detach()` 方法会断开文件的最顶层并返回第二层，之后最顶层就没什么用了。
+
+```python
+f = open('sample.txt', 'w')
+# <_io.TextIOWrapper name='sample.txt' mode='w' encoding='UTF-8'>
+b = f.detach() # 返回的第2层
+# <_io.BufferedWriter name='sample.txt'>
+f.write('hello')
+# Traceback (most recent call last):
+#    File "<stdin>", line 1, in <module>
+# ValueError: underlying buffer has been detached
+  
+f = io.TextIOWrapper(b, encoding='latin-1')
+# <_io.TextIOWrapper name='sample.txt' encoding='latin-1'>
+```
+
+
+
+#### 将字节写入文本文件
+
+如果你想在文本模式打开的文件中写入原始的字节数据，可以将字节数据直接写入文件的缓冲区即可，例如：
+
+```python
+>>> import sys
+>>> sys.stdout.write(b'Hello\n')
+Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+TypeError: must be str, not bytes
+>>> sys.stdout.buffer.write(b'Hello\n')
+Hello
+5
+```
+
+类似的，能够通过读取文本文件的 `buffer` 属性来读取二进制数据。
+
+原理：I/O系统以**层级结构的形式**构建而成。 文本文件是通过在一个拥有缓冲的二进制模式文件上增加一个Unicode编码/解码层来创建。 `buffer` 属性指向对应的底层文件。如果你**直接访问它的话就会绕过文本编码/解码层**。
+
+
+
+### 创建临时文件和文件夹
+
+`tempfile` 模块中有很多的函数可以完成这任务。
+
+**临时文件**：`tempfile.TemporaryFile`
+
+```python
+with TemporaryFile('w+t'，encoding='utf-8', errors='ignore') as f:
+    # Read/write to the file
+    f.write('Hello World\n')
+    f.write('Testing\n')
+
+    # Seek back to beginning and read the data
+    f.seek(0)
+    data = f.read()
+
+# Temporary file is destroyed
+```
+
+-   通常来讲文本模式使用 `w+t` ，二进制模式使用 `w+b` 。 这个模式同时支持读和写操作，在这里是很有用的
+-   结果文件关闭时会被自动删除掉。 如果你不想这么做，传递关键字参数 `delete=False` 
+-   所有和临时文件相关的函数都允许通过使用关键字参数 `prefix` 、`suffix` 和 `dir` 来自定义目录以及命名规则
+
+**带名字的临时文件**：`tempfile.NamedTemporaryFile`
+
+```python
+with NamedTemporaryFile('w+t', delete=False, prefix='mytemp', suffix='.txt', dir='/tmp') as f:
+    print('filename is:', f.name)
+# '/tmp/mytemp8ee899.txt'
+```
+
+**临时目录**： `tempfile.TemporaryDirectory()` 
+
+```python
+from tempfile import TemporaryDirectory
+
+with TemporaryDirectory() as dirname:
+    print('dirname is:', dirname)
+    # Use the directory
+    ...
+# Directory and all contents destroyed
+```
+
+
+
+
+
+## 多线程
+
+12.10~12.14 TODO
 
