@@ -74,9 +74,11 @@ conda create -n new_env --clone old_name    # 克隆环境，实现重命名
 
 # 激活/退出环境
 activate my_env                             # 激活环境 window
-source activate my_env                      # 激活环境 OSX/Linux
 deactivate                                  # 退出环境 window
-source deactivate                           # 退出环境 OSX/Linux
+conda activate my_env                       # 激活环境 OSX/Linux
+conda deactivate                            # 退出环境 OSX/Linux
+source activate my_env                      # 激活环境 OSX/Linux(弃用)
+source deactivate                           # 退出环境 OSX/Linux(弃用)
 
 # 导出环境信息文件，利用文件信息克隆环境
 conda env export > environment.yaml         # 将包保存为YAML，共享此文件，而且其他人能够用于创建和你项目相同的环境
