@@ -1,5 +1,6 @@
 ---
 title: linux shell编程
+
 tags:
   - shell
   - linux
@@ -7,6 +8,7 @@ categories:
   - linux
 date: 2019-08-13 11:00:08
 ---
+
 <Excerpt in index | 首页摘要> 
 
 <!-- more -->
@@ -399,6 +401,43 @@ $
 >
 >   反引号（``）：把其中的命令执行后返回结果，等价于$(命令)
 
+### 别名
+
+通常别名定义在 **$HOME/.bashrc** 或者 **$HOME/bash_aliases** (在 **$HOME/.bashrc**被加载).
+
+```shell
+if [ -e $HOME/.bash_aliases ]; then
+    source $HOME/.bash_aliases
+fi
+```
+
+推荐的别名
+
+```shell
+alias ls='ls -F'   # 目录名后面加上/
+alias ll='ls -lh'  # 人类可读的方式显示容量，KB、GB
+alias gh='history|grep' # 查找历史命令
+alias count='find . -type f | wc -l' # 计算当前目录下文件总数
+
+# 自定义函数最好保存在 bash_functions 文件中
+if [ -e $HOME/.bash_functions ]; then
+    source $HOME/.bash_functions
+fi
+# 切换目录同时展示目录下的内容
+function cl() {
+    DIR="$*";
+        # if no DIR given, go current dir
+        if [ $# -lt 1 ]; then
+                DIR=".";
+    fi;
+    builtin cd "${DIR}" && \
+    # use your preferred ls command
+        ls -F --color=auto
+}
+```
+
+
+
 ###  变量
 
 #### 环境变量
@@ -480,6 +519,50 @@ str5="${name}Script: ${url}index.html"  #这个时候需要给变量名加上大
 ${#string_name}
 ```
 
+##### 字符串的截取 
+
+假设有变量 `var=http://www.aaa.com/123.htm`
+
+**1. # 号截取，删除左边字符，保留右边字符。**
+
+```
+echo ${var#*//}
+```
+
+ 其中 var 是变量名，# 号是运算符，*// 表示从左边开始删除第一个 // 号及左边的所有字符
+即删除`http://`
+结果是 ：`www.aaa.com/123.htm`
+
+**2. ## 号截取，贪心地删除左边字符，保留右边字符。**
+
+```
+echo ${var##*/}
+```
+
+`##*/`表示从左边开始删除最后（最右边）一个 / 号及左边的所有字符
+即删除 `http://www.aaa.com/`
+
+结果是 `123.htm`
+
+**3. %号截取，删除右边字符，保留左边字符**
+
+```
+echo ${var%/*}
+```
+
+ `%/*` 表示从右边开始，删除第一个 / 号及右边的字符
+
+结果是：http://www.aaa.com
+
+**4. %% 号截取，贪心地删除右边字符，保留左边字符**
+
+```
+echo ${var%%/*}
+```
+
+ `%%/*` 表示从右边开始，删除最后（最左边）一个 / 号及右边的字符
+结果是：`http:`
+
 
 
 #### 删除变量
@@ -497,6 +580,69 @@ unset my_variable
 #### 变量前的 $ 符号
 
 记住一点就行了：如果要用到变量，使用`$`；如果要操作变量，不使用`$`。这条规则的一个例外就是使用 `printenv` 显示某个变量的值。
+
+
+
+#### `$*` 与`$@`
+
+`$*` 和`$@` 都表示传递给函数或脚本的所有参数， 当 `$*` 和 `$@` 不被**双引号`""`**包围时，它们之间没有任何区别，都是将接收到的每个参数看做一份数据，彼此之间以空格来分隔。
+
+但是当它们被双引号`" "`包含时，就会**有区别**了：
+
+-   `"$*"`会将所有的参数从**整体上看做一份数据**，而不是把每个参数都看做一份数据。
+-   `"$@"`仍然将每个参数都看作一份数据，彼此之间是独立的。
+
+比如传递了 5 个参数，那么对于`$*`来说，这 5 个参数会合并到一起形成一份数据，它们之间是无法分割的；而对于`$@`来说，这 5 个参数是相互独立的，它们是 5 份数据。
+
+```shell
+echo "脚本的名字是："$0
+n=1
+echo "使用\$@的参数列表为："$@
+for temstr in "$@"
+do
+  echo "第$n个参数是：" $temstr
+  let n+=1
+done
+
+n=1
+echo "使用\$*的参数列表为："$*
+for temstr in "$*"
+do
+  echo "第$n个参数是：" $temstr
+  let n+=1
+done
+
+##### 结果 #####
+
+脚本的名字是：test.sh
+使用$@的参数列表为：1 2 3 4 5
+第1个参数是： 1
+第2个参数是： 2
+第3个参数是： 3
+第4个参数是： 4
+第5个参数是： 5
+使用$*的参数列表为：1 2 3 4 5
+第1个参数是： 1 2 3 4 5
+```
+
+
+
+#### `$0`的含义
+
+第一种情况：直接命令调用一个shell，比如bash，会打开一个新的bash子shell，这时`echo $0`显示 shell的名称，比如`sh`，或者`bash`
+
+```
+# bash
+# echo '$0' is $0
+# $0 is bash
+```
+
+第二种情况：shell 调用脚本文件，那么在脚本文件中`echo $0`就是脚本的文件名
+
+```
+# bash  main.sh
+# $0 is main.sh
+```
 
 
 
@@ -522,50 +668,6 @@ unset my_variable
 TODO 没明白
 
 在命令行提示符下使用路径 ./ 运行命令的话，也会创建出子shell；要是运行命令的时候 不加入路径，就不会创建子shell。如果你使用的是内建的shell命令，并不会涉及子shell。 在命令行提示符下运行脚本时一定要留心！
-
-#### 数组变量
-
-给某个环境变量设置多个值，可以把值放在括号里，值与值之间用空格分隔。
-
-```bash
-$ mytest=(one two three four five)
-
-$ echo $mytest      # 打印数组只会显示第一个值
-one   
-
-$ echo ${mytest[*]} # 显示整个数组变量，用星号作为通配符放在索引值的位置。
-one two three four five
-
-$ echo ${mytest[2]} # 根据索引取值
-three
-```
-
-unset命令删除数组中的某个值，但是要小心，这可能会有点复杂。看下面的例子。
-
-```bash
-$ unset mytest[2]  
-
-$ echo {mytest[*]}  # 遍历时会跳过被删除的索引位置
-one two four five 
- 
-$ echo ${mytest[2]} # 但是该索引位置还占用着
-
-$ echo {mytest[3]} 
-four 
-```
-
-这个例子用unset命令删除在索引值为2的位置上的值。显示整个数组时，看起来像是索引 里面已经没这个索引了。但当专门显示索引值为2的位置上的值时，就能看到这个位置是空的。 最后，可以在unset命令后跟上数组名来删除整个数组。
-
-```
-$ unset mytest   
-$ echo {mytest[*]}
-```
-
-
-
-#### 变量展开TODO
-
-TODO
 
 
 
@@ -627,6 +729,291 @@ ${#file} 可得到 27 ，因为/dir1/dir2/dir3/my.file.txt 是27个字节
 
 [参考来源](https://www.jb51.net/article/64804.htm)
 
+
+
+### 数组变量
+
+-   Bash Shell 只支持一维数组（不支持多维数组）。
+-   初始化时不需要定义数组大小（与 PHP 类似）。
+-   数组元素的下标由0开始。
+
+#### 数组定义
+
+Shell 数组用括号来表示，元素用”空格”符号分割开，语法格式如下：
+
+```
+array_name=(value1 value2 … valuen)
+```
+
+例如：my_array=(A B “C” D)
+
+我们也可以使用下标来定义数组：
+
+```shell
+array_name[0]=value0
+array_name[1]=value1
+array_name[2]=value2
+```
+
+
+
+#### 读取数组
+
+这样是行不通的
+
+```shell
+$ echo $mytest      # 打印数组只会显示第一个值
+one
+```
+
+一般格式是：`${array_name[index]}`
+
+```shell
+my_array=(A B "C" D)
+echo "第一个元素为: ${my_array[0]}"
+echo "第二个元素为: ${my_array[1]}"
+echo "第三个元素为: ${my_array[2]}"
+echo "第四个元素为: ${my_array[3]}"
+```
+
+**获取数组中的所有元素**
+
+使用`@` 或 `*` 可以获取数组中的所有元素，例如：
+
+```shell
+my_array=(A B "C" D)
+echo "数组的元素为: ${my_array[*]}"
+echo "数组的元素为: ${my_array[@]}"
+
+# 数组的元素为: A B C D 数组的元素为: A B C D
+```
+
+**获取数组的长度**
+
+获取数组长度的方法与获取字符串长度的方法相同，例如：
+
+```shell
+my_array=(A B "C" D)
+echo "数组元素个数为: ${#my_array[*]}"
+echo "数组元素个数为: ${#my_array[@]}"
+
+# 数组元素个数为: 4 数组元素个数为: 4
+```
+
+#### 删除某个值
+
+unset命令删除数组中的某个值，但是要小心，这可能会有点复杂。看下面的例子。
+
+```bash
+$ unset mytest[2]  
+
+$ echo {mytest[*]}  # 遍历时会跳过被删除的索引位置
+one two four five 
+ 
+$ echo ${mytest[2]} # 但是该索引位置还占用着
+
+$ echo {mytest[3]} 
+four 
+```
+
+这个例子用unset命令删除在索引值为2的位置上的值。显示整个数组时，看起来像是索引 里面已经没这个索引了。但当专门显示索引值为2的位置上的值时，就能看到这个位置是空的。 最后，可以在unset命令后跟上数组名来删除整个数组。
+
+```shell
+$ unset mytest   
+$ echo {mytest[*]}
+```
+
+
+
+#### 数组遍历
+
+首先创建一个数组 array=( A B C D 1 2 3 4)
+
+##### **标准的for循环**
+
+```shell
+for(( i=0;i<${#array[@]};i++)) #${#array[@]}获取数组长度用于循环
+do    
+	echo ${array[i]}
+done
+```
+
+
+
+##### **for … in**
+
+不带数组下标
+
+```shell
+for element in ${array[@]}    #也可以写成for element in ${array[*]}
+do
+    echo $element
+done
+```
+
+带数组下标
+
+```shell
+for i in ${!array[@]}  
+do   
+   echo $i ${array[$i]}
+done 
+```
+
+
+
+##### **while循环法**
+
+```shell
+i=0  
+while [ $i -lt ${#array[@]} ]    #当变量（下标）小于数组长度时进入循环体
+do  
+    echo ${array[$i]}   #按下标打印数组元素
+    let i++  
+done 
+```
+
+
+
+### shell 展开
+
+Bash 有七种扩展格式。本文只介绍其中五种：`~` 扩展、算术扩展、路径名称扩展、大括号扩展和命令替换。
+
+![shell 展开](./shell展开.png)
+
+
+
+#### `{}`花括号
+
+从一个包含花括号的模式中创建多个文本字符串。
+
+```shell
+# 逗号
+$ echo Front-{A,B,C}-Back
+Front-A-Back Front-B-Back Front-C-Back
+
+# 序列
+$ echo Num_{1..5}
+Num_1 Num_2 Num_3 Num_4 Num_5
+
+$ echo Num_{1..10..2}  # 间隔
+Num_1 Num_3 Num_5 Num_7 Num_9
+
+$ echo {Z..A}          # 倒序
+Z Y X W V U T S R Q P O N M L K J I H G F E D C B A
+
+$ echo a{A{1,2},B{3,4}}b #嵌套
+aA1b aA2b aB3b aB4b
+```
+
+
+
+#### `~`扩展 
+
+Bash shell 把这个快捷方式展开成用户的完整的家目录。
+
+```shell
+$ echo ~
+/home/student
+```
+
+
+
+#### 路径名称扩展
+
+路径名称扩展是展开文件通配模式为匹配该模式的完整路径名称的另一种说法，匹配字符使用 `?` 和 `*`
+
+-   `?` — 匹配字符串中特定位置的一个任意字符
+
+-   `*` — 匹配字符串中特定位置的 0 个或多个任意字符
+
+
+
+#### `$`展开
+
+'$' 符号引入了三种 shell 展开，包括 “参数展开”，“命令替换” 和 “算术表达式”。
+
+##### 参数展开
+
+```shell
+$ echo $USER
+```
+
+参数展开的基本的形式是 `${PARAMETER}`，整体被替换为 PARAMETER 的值。花括号如果 PARAMETER 是位置参数，而且由两个及以上的数字表示，这时必须使用花括号：`${10}`。另外当 PARAMETER 与其它字符相邻连接时，也必须使用花括号：`${Var}lala`。
+
+
+
+##### 命令替换
+
+命令替换是让一个命令的标准输出数据流被当做参数传给另一个命令的扩展形式。
+
+命令替换有两种格式：``command`` 和 `$(command)`。
+
+```shell
+$ echo "Todays date is $(date)"
+Todays date is Sun Apr  7 14:42:59 EDT 2019
+```
+
+
+
+##### 算术扩展
+
+数字扩展的语法是 `$((arithmetic-expression))` ，分别用两个括号来打开和关闭表达式。算术扩展在 shell 程序或脚本中**类似命令替换**；表达式结算后的结果替换了表达式，用于 shell 后续的计算。
+
+```shell
+$ Var1=5 ; Var2=7 ; Var3=$((Var1*Var2)) ; echo "Var 3 = $Var3"
+Var 3 = 35
+```
+
+
+
+#### 禁用展开
+
+##### 双引号
+
+把文本放在双引号中后，shell 使用的特殊字符，除了 `$`，`\` ，和 `（倒引号）之外， 则失去它们的特殊含义，被当作普通字符来看待。这意味着单词分割、路径名展开、波浪线展开、花括号展开都被禁止，**然而参数展开，算术展开，命令替换仍然有效。**
+
+```shell
+# 多余的空格会被压缩
+$ echo this is a    test
+this is a test
+
+# 双引号关闭了单词分割功能
+$ echo "this is a    test"
+this is a    test
+```
+
+案例2
+
+```shell
+# 1. 没有引用的命令替换导致命令行包含 38 个参数。
+$ echo $(cal)
+January 2019 Su Mo Tu We Th Fr Sa 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+
+# 2. 命令行只有一个参数，参数中包括嵌入的空格和换行符。
+$ echo "$(cal)"
+    January 2019
+Su Mo Tu We Th Fr Sa
+       1  2  3  4  5
+ 6  7  8  9 10 11 12
+13 14 15 16 17 18 19
+20 21 22 23 24 25 26
+27 28 29 30 31
+```
+
+##### 单引号
+
+如果需要禁止所有的展开，需要使用单引号，包括转义符号`\`
+
+##### 转义字符
+
+在文件名中可能使用一些对于 shell 来说，有特殊含义的字符。这些字符包括 "$", "!", " " 等字符。在文件名中包含特殊字符，你可以这样做：
+
+```
+mv bad\&filename good_filename
+```
+
+注意在**单引号**中，反斜杠**失去它的特殊含义**，它会被看作普通字符。
 
 
 
@@ -969,6 +1356,32 @@ shell中运行的每个命令都使用退出状态码（exit status）告诉shel
 
 ### 流程控制
 
+#### 逻辑符号
+
+`command1 && command2` ：如果 command1 执行成功，那么接着执行 command2。如果 command1 失败，就跳过 command2。
+
+`command1 || command2`：如果 command1 失败，执行 command2。隐藏的逻辑是，如果 command1 成功，跳过 command2。
+
+`&&` 和 `||` 两种运算符结合起来才能发挥它们的最大功效
+
+```shell
+前置 commands ; command1 && command2 || command3 ; 跟随 commands
+```
+
+语法解释：假如 command1 退出时返回码为零，就执行 command2，否则执行 command3。**类似于 if-else的逻辑**。
+
+用具体代码试试，在 root 的 home 目录下测试：
+
+```shell
+[student@studentvm1 ~]$ Dir=/root/testdir ; mkdir $Dir && cd $Dir || echo "$Dir was not created."mkdir: cannot create directory '/root/testdir': Permission denied/root/testdir was not created.
+```
+
+现在在你的家目录执行，你将会有权限创建这个目录了：
+
+```shell
+[student@studentvm1 ~]$ Dir=~/testdir ; mkdir $Dir && cd $Dir || echo "$Dir was not created."
+```
+
 #### if else
 
 ```
@@ -1005,7 +1418,8 @@ fi
 **if elif** 
 
 ```
-if command1 then
+if command1 
+then
     commands 
 elif command2
 then
@@ -1067,24 +1481,24 @@ test命令可以判断三类条件：
 2.  字符串比较
 3.  文件比较
 
-###### *整数比较*
+###### 整数比较
 
 我们不能在 test命令中使用浮点值
 
 ```
-n1 -eq n2    # 检查n1是否与n2相等 
-n1 -ge n2    # 检查n1是否大于或等于n2 
-n1 -gt n2    # 检查n1是否大于n2 
-n1 -le n2    # 检查n1是否小于或等于n2 
-n1 -lt n2    # 检查n1是否小于n2 
-n1 -ne n2    # 检查n1是否不等于n2
+n1 -eq n2    # 检查n1是否=n2 
+n1 -ge n2    # 检查n1是否>=n2 
+n1 -gt n2    # 检查n1是否>n2 
+n1 -le n2    # 检查n1是否<=n2 
+n1 -lt n2    # 检查n1是否<n2 
+n1 -ne n2    # 检查n1是否!=n2
 ```
 
 test命令只能在比较中使用简单的 算术操作。双括号命令提供了更多的数学符号。请看后面内容。
 
 
 
-###### *字符串比较(有坑)*
+###### 字符串比较(有坑)
 
 ```
 str1 = str2   # 检查str1是否和str2相同 
@@ -1092,8 +1506,18 @@ str1 != str2  # 检查str1是否和str2不同
 str1 \< str2   # 检查str1是否比str2小，注意一定要转义
 str1 \> str2   # 检查str1是否比str2大，注意一定要转义
 -n str1       # 检查str1的长度是否非0
--z str1       # 检查str1的长度是否为0，未在shell脚本中定义过，所以它的字符串长度仍然 为0，
+-z str1       # 检查str1的长度是否为0，未在shell脚本中定义过，所以它的字符串长度仍然 为0
 ```
+
+**字符串长度比较**
+
+计算字符串的长度没有简单的方法。有很多种方法可以计算，但是我认为使用 `expr`（求值表达式）命令是相对最简单的一种。
+
+```shell
+MyVar="How long is this?" ; expr length "$MyVar"    # 注意 mac 中并没有 length 这个命令
+```
+
+
 
 这里会出现经常困扰shell程序员的问题：
 
@@ -1105,23 +1529,79 @@ str1 \> str2   # 检查str1是否比str2大，注意一定要转义
 
 -   未在shell脚本中定义过，`-z`认为它的字符串长度为0
 
-###### *文件比较*
 
-```
--e file               # 是否存在，可用于文件和目录
--d file               # 是否存在并是一个目录
--f file               # 是否存在并是一个文件
--s file               # 是否存在并非空
--r file               # 是否存在并可读
--w file               # 是否存在并可写
--x file               # 是否存在并可执行
--O file               # 是否存在并属当前用户所有
--G file               # 是否存在并且默认组与当前用户相同
 
-# 在你尝试使用-nt或 -ot比较文件之前，必须先确认文件是存在的。
-file1 -nt file2       # 检查file1是否比file2新
-file1 -ot file2       # 检查file1是否比file2旧
+**字符串中有空格的情况处理**
+
+有些人从在文件名或者命令行参数中使用空格，你需要在编写脚本时时刻记得这件事。你需要时刻记得用引号包围变量。
+
+`if [ $filename = "foo" ];`
+
+当$filename变量包含空格时就会挂掉。可以这样解决：
+
+`if [ "$filename" = "foo" ];`
+
+使用`$@`变量时，你也需要使用引号，因为空格隔开的两个参数会被解释成两个独立的部分。
+
+
+
+###### 文件比较
+
+| 操作符            | 描述                                                         |
+| :---------------- | :----------------------------------------------------------- |
+| `-a filename`     | 如果文件存在，返回真值；文件可以为空也可以有内容，但是只要它存在，就返回真值 |
+| `-b filename`     | 如果文件存在且是一个块设备，如 `/dev/sda` 或 `/dev/sda1`，则返回真值 |
+| `-c filename`     | 如果文件存在且是一个字符设备，如 `/dev/TTY1`，则返回真值     |
+| `-d filename`     | 如果文件存在且是一个目录，返回真值                           |
+| `-e filename`     | 如果文件存在，返回真值；与上面的 `-a` 相同，可用于文件和目录 |
+| `-f filename`     | 如果文件存在且是一个一般文件，不是目录、设备文件或链接等的其他的文件，则返回 真值 |
+| `-g filename`     | 如果文件存在且 `SETGID` 标记被设置在其上，返回真值           |
+| `-h filename`     | 如果文件存在且是一个符号链接，则返回真值                     |
+| `-k filename`     | 如果文件存在且粘滞位已设置，则返回真值                       |
+| `-p filename`     | 如果文件存在且是一个命名的管道（FIFO），返回真值             |
+| `-r filename`     | 如果文件存在且有可读权限（它的可读位被设置），返回真值       |
+| `-s filename`     | 如果文件存在且大小大于 0，返回真值（存在并非空）；如果一个文件存在但大小为 0，则返回假值 |
+| `-t fd`           | 如果文件描述符 `fd` 被打开且被关联到一个终端设备上，返回真值 |
+| `-u filename`     | 如果文件存在且它的 `SETUID` 位被设置，返回真值               |
+| `-w filename`     | 如果文件存在且有可写权限，返回真值                           |
+| `-x filename`     | 如果文件存在且有可执行权限，返回真值                         |
+| `-G filename`     | 如果文件存在且文件的组 ID 与当前用户相同，返回真值           |
+| `-L filename`     | 如果文件存在且是一个符号链接，返回真值（同 `-h`）            |
+| `-N filename`     | 如果文件存在且从文件上一次被读取后文件被修改过，返回真值     |
+| `-O filename`     | 如果文件存在且你是文件的拥有者，返回真值                     |
+| `-S filename`     | 如果文件存在且文件是套接字，返回真值                         |
+|                   | 在你尝试使用`ef`、`-nt`或 `-ot`比较文件之前，必须先确认文件是存在的。 |
+| `file1 -ef file2` | 如果文件 `file1` 和文件 `file2` 指向同一设备的同一 INODE 号，返回真值（即硬链接） |
+| `file1 -nt file2` | 如果文件 `file1` 比 `file2` 新（根据修改日期），或 `file1` 存在而 `file2` 不存在，返回真值 |
+| `file1 -ot file2` | 如果文件 `file1` 比 `file2` 旧（根据修改日期），或 `file1` 不存在而 `file2` 存在 |
+
+判断文件存在并不为空的脚本
+
+```shell
+File="TestFile1"
+echo "This is $File" > $File
+if [ -s $File ]
+   then
+   echo "$File exists and contains data."
+elif [ -e $File ]
+   then
+   echo "$File exists and is empty."
+else
+   echo "$File does not exist."
+fi
 ```
+
+###### 其他杂项
+
+这些杂项操作符展示一个 shell 选项是否被设置，或一个 shell 变量是否有值，但是它不显示变量的值，只显示它是否有值。
+
+| 操作符       | 描述                                                         |
+| :----------- | :----------------------------------------------------------- |
+| `-o optname` | 如果一个 shell 选项 `optname` 是启用的（查看内建在 Bash 手册页中的 set `-o` 选项描述下面的选项列表），则返回真值 |
+| `-v varname` | 如果 shell 变量 `varname` 被设置了值（被赋予了值），则返回真值 |
+| `-R varname` | 如果一个 shell 变量 `varname` 被设置了值且是一个名字引用，则返回真值 |
+
+https://linux.cn/article-11687-1.html
 
 
 
@@ -1280,7 +1760,9 @@ esac
 
 
 
-#### for（Python 风格）
+#### for
+
+Python 风格
 
 ```
 for var in list 
@@ -1342,13 +1824,23 @@ done
 
 
 
-list添加
+**list添加**
 
 用`"`进行拼接
 
 ```
 list="Alabama Alaska Arizona Arkansas Colorado" 
 list=$list" Connecticut" # 拼接
+```
+
+
+
+**循环命令结果**
+
+使用命令替换符号可以对命令的结果进行循环
+
+```shell
+for RPM in `rpm -qa | sort | uniq` ; do rpm -qi $RPM ; done
 ```
 
 
@@ -1435,6 +1927,12 @@ for (( variable assignment ; condition ; iteration process ))
 ```
 #!/bin/bash 
 # multiple variables
+
+for ((i=1; i<=100; i ++))
+do
+	echo $i
+done
+
 
 for (( a=1, b=10; a <= 10 && b>=5; a++, b-- )) 
 do 
@@ -1575,10 +2073,42 @@ while IFS=',' read -r userid name
 do
     echo "adding $userid"
     useradd -c "$name" -m $userid 
-done < "$input"
+done < "$input"      
 ```
 
-                                                                  
+​          
+
+### 函数
+
+所有函数**在使用前必须定义**。这意味着必须将函数放在脚本开始部分，直至shell解释器首次发现它时，才可以使用。调用函数仅使用其函数名即可。
+
+```shell
+# [ ] 中括号表示可选
+
+[ function ] funname [()]
+{
+
+    action;
+    [return int;]
+}
+```
+
+调用函数时可以向其传递参数。在函数体内部，通过 `$n` 的形式来获取参数的值
+
+```shell
+funWithParam(){
+    echo "第一个参数为 $1 !"
+    echo "第二个参数为 $2 !"
+    echo "第十个参数为 $10 !"
+    echo "第十个参数为 ${10} !"
+    echo "第十一个参数为 ${11} !"
+    echo "参数总数有 $# 个!"
+    echo "作为一个字符串输出所有参数 $* !"
+}
+funWithParam 1 2 3 4 5 6 7 8 9 34 73
+```
+
+
 
 ### Tips
 
@@ -1604,9 +2134,77 @@ done < "$input"
 
 #### 获取文件的绝对路径
 
+**误区一**
+
+是使用 **pwd** 命令，print name of current/working directory
+
+你可以试试 `bash shell/a.sh`，`a.sh` 内容是 `pwd`，你会发现，显示的是执行命令的路径 `/home/june`，并不是`a.sh` 所在路径：`/home/june/shell/a.sh`
+
+**误区二**
+
+ **$0**，这个也是不对的，这个$0是Bash环境下的特殊变量，其真实含义是：
+
+这个`$0`有可能是好几种值，跟调用的方式有关系：
+
+-   使用一个文件调用bash，那$0的值，是那个文件的名字(没说是绝对路径噢)
+-   使用-c选项启动bash的话，真正执行的命令会从一个字符串中读取，字符串后面如果还有别的参数的话，使用从$0开始的特殊变量引用(跟路径无关了)
+-   除此以外，$0会被设置成调用bash的那个文件的名字(没说是绝对路径)
+
+
+
+**正确方法：dirname 配合 readlink**
+
+`dirname` ：可以获取所在目录，输出已经去除了尾部的“/”字符部分的名称；如果名称中不包含“/”，则显示“.”(表示当前目录)。
+
+>   取决于你传递给它的是不是绝对路径
+
+`readlink` 可以获取文件的完整路径
+
+最终形式：
+
 ```shell
-echo $(readlink -f $0)
+echo $(dirname $(readlink -f "$0"))
 ```
+
+
+
+例子
+
+下面对比下正确答案：
+
+```
+Jun@VAIO 192.168.1.216 23:52:54 ~ >
+cat shell/a.sh
+#!/bin/bash
+echo '$0: '$0
+echo "pwd: "`pwd`
+echo "============================="
+echo "scriptPath1: "$(cd `dirname $0`; pwd)
+echo "scriptPath2: "$(pwd)
+echo "scriptPath3: "$(dirname $(readlink -f $0))
+echo "scriptPath4: "$(cd $(dirname ${BASH_SOURCE:-$0});pwd)
+echo -n "scriptPath5: " && dirname $(readlink -f ${BASH_SOURCE[0]})
+
+Jun@VAIO 192.168.1.216 23:53:17 ~ >
+bash shell/a.sh
+$0: shell/a.sh
+pwd: /home/Jun
+=============================
+scriptPath1: /home/Jun/shell
+scriptPath2: /home/Jun
+scriptPath3: /home/Jun/shell
+scriptPath4: /home/Jun/shell
+scriptPath5: /home/Jun/shell
+```
+
+在此解释下 scriptPath1 ：
+
+-   `dirname $0`，取得当前执行的脚本文件的父目录
+-   `cd dirname $0`，进入这个目录(切换当前工作目录)
+-   `pwd`，显示当前工作目录(cd执行后的)
+-   由此，我们获得了当前正在执行的脚本的存放路径。
+
+
 
 ####  检查命令是否存在
 
@@ -1631,6 +2229,15 @@ gnudate() {
 ```
 
 
+
+#### 路径中获取文件
+
+```shell
+chengdan_file="dir/file.txt"
+echo $chengdan_file
+file_name=${chengdan_file##*/}   # 去除目录
+file_name=${file_name%%.*}       # 去除后缀
+```
 
 
 
