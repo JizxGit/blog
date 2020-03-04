@@ -118,7 +118,7 @@ youyan:
 ## "5": show images form bg-1.jpg to bg-5.jpg in `/yelee/source/background/`
 ## "5": 显示`/yelee/source/background/`文件夹中 bg-1.jpg 到 bg-5.jpg 这5张图片
 ## "0": white-gray background | 淳朴灰白背景
-background_image: 6
+background_image: 9
 
 # Base Font Size | 字号调节
 base_font_size: 14  #px, 16 - 24
@@ -143,10 +143,10 @@ blockquote_style:
 
 # Headings Style | 标题风格
 ## 0-Yelee, 1-Yilia, 2-GitHub
-heading_style: 2 # Value: 0 - 2
+heading_style: 0 # Value: 0 - 2
 
 ## List style type (ul) | 无序列表项标记样式
-list_style: 0  # value: 0 - 12 可选
+list_style: 7  # value: 0 - 12 可选
 
 # 左边栏宽度 px
 left_col_width: 350
@@ -158,7 +158,7 @@ copyright: true
 toc:
   on: true
   list_number: false # 目录序号
-  max_depth: 4  # 1 - 6 (h1-h6) 目录最大级数
+  max_depth: 5  # 1 - 6 (h1-h6) 目录最大级数
   nowrap: false # Keep title on same line | 目录标题不换行
 
 # 是否开启主页及加载头像时的动画效果
@@ -231,7 +231,7 @@ tab_title_change:
 ## https://github.com/PaicHyperionDev/hexo-generator-search
 search: 
   on: true
-  onload: false
+  onload: true
   ## true: get search.xml file when the page has loaded
   ## false: get the file when search box gets focus
 

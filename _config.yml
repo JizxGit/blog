@@ -5,7 +5,13 @@
 # Site
 title:  玖玖的博客
 subtitle: 个人学习笔记，各种杂杂碎碎O(∩_∩)O
-keywords: java,python,linux,javascript
+#keywords: java,python,linux,javascript
+keywords:
+  - python
+  - 机器学习
+  - linux
+  - java
+
 description:
 author: jizx
 language: zh-Hans
@@ -18,7 +24,7 @@ widgets:
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: https://jizx.top
+url: https://jizx.vip
 root: /
 permalink: :year/:month/:day/:title/
 permalink_defaults:
@@ -96,8 +102,10 @@ baidu_url_submit:
 deploy:
 - type: baidu_url_submitter #百度站长主动提交
 - type: git
-  repo: git@github.com:JizxGit/jizxgit.github.io.git
+  repo:
+    git@e.coding.net:jizx/jizx.coding.me.git
   branch: master
 - type: git
-  repo: git@git.dev.tencent.com:jizx/jizx.coding.me.git
-  branch: master
+  repo:
+    git@github.com:JizxGit/jizxGit.github.io.git
+  branch: master  
