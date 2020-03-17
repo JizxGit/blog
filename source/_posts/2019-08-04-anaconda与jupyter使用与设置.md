@@ -19,9 +19,9 @@ jupyter 使用介绍、与 anaconda 的虚拟环境结合 、右键打开配置
 
 
 
-### anaconda 
+# anaconda 
 
-#### 安装
+## 安装
 
 1. [清华镜像站下载](https://mirrors.tuna.tsinghua.edu.cn/anaconda/archive/?C=M&O=D) 或者[清华镜像站anaconda首页](https://mirrors.tuna.tsinghua.edu.cn/help/anaconda/) 或者[anaconda官网](https://www.anaconda.com/distribution/)(比较慢)
 
@@ -45,7 +45,7 @@ jupyter 使用介绍、与 anaconda 的虚拟环境结合 、右键打开配置
 
 4. 推荐在默认环境下更新所有的包。打开 Anaconda Prompt （或者 Mac 下的终端），键入`conda upgrade —all`
 
-#### 使用
+## 使用
 
 默认有一个base环境，推荐在此基础上，再创建2个环境，分别是：Python3和Python2
 
@@ -54,7 +54,7 @@ conda create -n py3 python=3.6      # 如果是 python=3 默认安装最新版
 conda create -n py2 python=2.7
 ```
 
-##### 包管理
+### 包管理
 
 ```bash
 conda install numpy scipy pandas            # 安装多个包
@@ -66,7 +66,7 @@ conda list                                  # 列出已安装的包
 conda search search_term                    # 如果不知道要找的包的确切名称，可以尝试进行搜索 
 ```
 
-#####  环境管理
+###  环境管理
 
 ```bash
 # 创建、删除环境，记得替换 env_name 为自定义的环境名称
@@ -106,7 +106,7 @@ alias deactivate="source deactivate"
 
 
 
-### jupyter/jupyter-lab
+# jupyter/jupyter-lab
 
 推荐安装jupyter的升级版**jupyter lab**： `conda install -c conda-forge jupyterlab `
 
@@ -114,7 +114,7 @@ alias deactivate="source deactivate"
 
 如果经常在Python3与Python2之间切换，为了不用每次都先切换环境才能使用 jupyter，可以进行一下配置，实现直接在 jupyter 打开的网页中指定环境。
 
-#### 使用anaconda的虚拟环境
+## 使用anaconda的虚拟环境
 
 1. 激活虚拟环境 `source activate 环境名称`
 
@@ -126,9 +126,9 @@ alias deactivate="source deactivate"
 
 
 
-#### windows右键打开Jupyter\Jupyter-lab
+## windows右键打开Jupyter\Jupyter-lab
 
-Jupyter-lab类似
+注：Jupyter-lab类似
 
 1. 打开 regedit，定位到`HKEY_CLASSES_ROOT\Directory\Background\shell`
 
