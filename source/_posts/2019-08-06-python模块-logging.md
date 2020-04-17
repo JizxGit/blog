@@ -136,7 +136,9 @@ logging模块就是通过下面这些组件来完成日志处理的，上面所�
 - 每个处理器（handler）都可以设置自己的过滤器（filter）实现日志过滤，从而只保留感兴趣的日志；
 - 每个处理器（handler）都可以设置自己的格式器（formatter）实现同一条日志以不同的格式输出到不同的地方。
 
-简单点说就是：**日志器（logger）是入口，真正干活儿的是处理器（handler），处理器（handler）还可以通过过滤器（filter）和格式器（formatter）对要输出的日志内容做过滤和格式化等处理操作。**
+![组件结构图](./组件结构图.png)
+
+简单点说就是：**logger是入口，真正干活儿的是handler，handler还可以通过filter和formatter对要输出的日志内容做过滤和格式化等处理操作。**
 
 
 
@@ -279,7 +281,44 @@ filter方法用于具体控制传递的record记录是否能通过过滤，如�
 
 ### 最佳实践
 
-**需求：**
+**标准屏幕日志**
+
+```python
+import logging
+
+def get_stream_logger(name='LOGGER', level='debug', output_format=None):
+    """
+    获取标准屏幕日志器
+    :param name: 日志器名称
+    :param level: 日志级别
+    :param output_format: 输出格式
+    :return: 
+    """
+    """
+    """
+    if output_format is None:
+        output_format = "%(name)s:%(asctime)s %(filename)s[line:%(lineno)d]:%(levelname)s:%(message)s"
+
+    level_relations = {
+        'debug': logging.DEBUG,
+        'info': logging.INFO,
+        'warning': logging.WARNING,
+        'error': logging.ERROR,
+        'crit': logging.CRITICAL
+    }  # 日志级别关系映射
+
+    logger = logging.getLogger(name)
+    logger.setLevel(level_relations[level])
+    stream = logging.StreamHandler()
+    stream.setFormatter(logging.Formatter(output_format))
+    logger.addHandler(stream)
+
+    return logger
+```
+
+
+
+**屏幕文件双日志**
 
 输出log到控制台，并将日志写入log文件，保存2种类型的log：
 
@@ -294,6 +333,9 @@ from logging import handlers
 
 def get_logger(filename, level='info', when='D', backCount=3, 
                fmt='%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s'):
+  	"""
+  	
+  	"""
     level_relations = {
         'debug': logging.DEBUG,
         'info': logging.INFO,
