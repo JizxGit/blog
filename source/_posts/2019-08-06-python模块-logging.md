@@ -179,7 +179,7 @@ logging模块就是通过下面这些组件来完成日志处理的，上面所�
 
 `logging.getLogger('name')`方法有一个可选参数name，该参数表示将要返回的日志器的名称标识， 默认为`root`。若以相同的name参数值多次调用`getLogger()`方法，将会返回指向**同一个logger对象的引用**。
 
-
+初始的logger是没有handler的，因此无法无法打印日志，需要配置handler后才能使用。
 
 ##### 日志器的继承
 
@@ -304,7 +304,7 @@ def get_stream_logger(name='LOGGER', level='debug', output_format=None):
         'info': logging.INFO,
         'warning': logging.WARNING,
         'error': logging.ERROR,
-        'crit': logging.CRITICAL
+        'critical': logging.CRITICAL
     }  # 日志级别关系映射
 
     logger = logging.getLogger(name)
@@ -323,51 +323,48 @@ def get_stream_logger(name='LOGGER', level='debug', output_format=None):
 输出log到控制台，并将日志写入log文件，保存2种类型的log：
 
 - all.log 保存debug, info, warning, critical 信息
-
 - error.log则只保存error信息，同时按照时间自动分割日志文件
 
 ```python
-import logging
-from logging import handlers
-
-
-def get_logger(filename, level='info', when='D', backCount=3, 
-               fmt='%(asctime)s - %(pathname)s[line:%(lineno)d] - %(levelname)s: %(message)s'):
-  	"""
-  	
-  	"""
+def get_file_screen_logger(name='LOGGER', filename=None, level='info', when='D', backCount=3, fmt=None):
+    """
+    获取标准屏幕、文件输出日志器
+    :param name:日志器的名称
+    :param filename: 保存的文件名
+    :param level:日志级别
+    :param when: 日志生成间隔的时间单位，单位有以下几种：
+        # S 秒、M 分、H 小时、、D 天、、W 每星期（interval==0时代表星期一）、midnight 每天凌晨
+    :param backCount: 备份数量
+    :param fmt:日志输出格式
+    :return:
+    """
     level_relations = {
         'debug': logging.DEBUG,
         'info': logging.INFO,
         'warning': logging.WARNING,
         'error': logging.ERROR,
-        'crit': logging.CRITICAL
+        'critical': logging.CRITICAL
     }  # 日志级别关系映射
-    logger = logging.getLogger(filename)
+    logger = logging.getLogger(name)
     logger.setLevel(level_relations.get(level))  # 设置日志级别
+    if fmt is None:
+        fmt = '%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s'
     format_str = logging.Formatter(fmt)  # 设置日志格式
 
     out_screen = logging.StreamHandler()  # 往屏幕上输出
     out_screen.setFormatter(format_str)  # 设置屏幕上显示的格式
+    logger.addHandler(out_screen)  # 把对象加到logger里
 
-    out_file = handlers.TimedRotatingFileHandler(filename=filename, when=when, backupCount=backCount, encoding='utf-8')  # 往文件里写入，指定间隔时间自动生成文件的处理器
-    out_file.setFormatter(format_str)  # 设置文件里写入的格式
+    if filename is None:
+        raise Exception('未指定日志文件名 ')
+    # 往文件里写入，指定间隔时间自动生成文件的处理器
     # interval是时间间隔，backupCount是备份文件的个数，如果超过这个个数，就会自动删除，when是间隔的时间单位，单位有以下几种：
     # S 秒、M 分、H 小时、、D 天、、W 每星期（interval==0时代表星期一）、midnight 每天凌晨
-
-    logger.addHandler(out_screen)  # 把对象加到logger里
+    out_file = handlers.TimedRotatingFileHandler(filename=filename, when=when, backupCount=backCount, encoding='utf-8')
+    out_file.setFormatter(format_str)  # 设置文件里写入的格式
     logger.addHandler(out_file)
-    return logger
 
-if __name__ == '__main__':
-    log = get_logger('all.log',level='debug')
-    log.debug('debug')
-    log.info('info')
-    log.warning(u'警告')
-    log.error(u'报错')
-    log.critical(u'严重')
-    error_log= get_logger('error.log', level='error')
-    error_log.error('error')
+    return logger
 ```
 
 
