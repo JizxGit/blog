@@ -1057,7 +1057,7 @@ $ 3  9  42
 
 理解上面的原理后，就可以明白下面的例子了：
 
-**标准输出和标准错误重定向到不同log文件中**
+**1、标准输出和标准错误重定向到不同log文件中**
 
 ```shell
 sh mr_add_test.sh >log.log 2>log_err.log
@@ -1065,18 +1065,17 @@ sh mr_add_test.sh >log.log 2>log_err.log
 
 
 
-**将标准输出和标准错误重定向到同一log文件**
+**2、将标准输出和标准错误重定向到同一log文件**
 
 ```
 foo >file 2>&1 
 ```
 
-`>file` 将标准输出重定向到文件中
-`2>&1`  将错误绑定到标准输出上，此时标准输出已经重定向到file了
+解读：`>file` 将标准输出重定向到文件中，`2>&1`  将错误绑定到标准输出上，此时标准输出已经重定向到file了
 
 
 
-**输出标准输出和标准错误，同时保存到文件logfile**
+**3、输出标准输出和标准错误，同时保存到文件logfile**
 
 方法一： `<command> 2>&1 | tee <logfile>`
 
@@ -1090,15 +1089,15 @@ cat可以带多个文件参数，同时显示多个文件的内容。 `-`代表�
 
 
 
-**只输出错误，并保存到文件中**
+**4、只输标准出错误，并保存错误信息到文件中**
 
 ```
 <command> 2>&1 >/dev/null | tee logfile
 ```
 
-这条命令其实分为两命令，一个是`>/dev/null`，另一个是`2>&1`。
+这条命令其实分为两命令来看：
 
-1.  `2>&1`  将标准错误重定向到标准输出，注意，**此时标准输出还没有被重定向**
+1.  `2>&1`  将标准错误重定向到标准输出，注意，**此时标准输出还没有被重定向**，其输出仍然是屏幕。
 2.   `/dev/null`文件是一个空设备，类似于windows内的回收站，使用`>/dev/null`将标准输出重定向到`/dev/null`，即不显示标准输出的内容。所以这时的标准输出就仅变为重定向过来的标准错误了。
 
 相反，如果两者颠倒顺序，那标准输出连同它的副本都会被重定向到/dev/null，这是一个逻辑问题。
@@ -1126,6 +1125,52 @@ cat out
 而且，由于out文件被打开了两次，两个文件描述符会抢占性的往文件中输出内容，所以整体IO效率不如`>/dev/null 2>&1`来得高。
 
 
+
+**5、`&>`与`2>&1`的区别**
+
+**&>file** 意思是把**标准输出** 和 **标准错误输出** 都重定向到文件file中
+
+**2>&1**  意思是把 标准错误输出 重定向到 标准输出，标准输出并不一定输出到文件中哦
+
+> Bash's man page mentions there's two ways to redirect [stderr and stdout](https://en.wikipedia.org/wiki/Standard_streams): `&> file` and `>& file`. Now, notice that it says both stderr and stdout.
+>
+> In case of this `>file 2>&1` we are doing redirection of stdout (1) to file, but then also telling stderr(2) to be redirected to the same place as stdout ! So the purpose may be the same, but the idea slightly different. In other words "John, go to school; Suzzie go where John goes".
+>
+> 在这个`> file 2>＆1`的情况下，我们正在将stdout（1）重定向到文件，然后还要告诉stderr（2）重定向到与stdout相同的位置！ 因此目的可能是相同的，但想法略有不同。 换句话说，“约翰，去上学；苏奇去约翰去的地方”。
+>
+> What about preference ? `&>` is a `bash` thing. So if you're porting a script, that won't do it. But if you're 100% certain your script will be only working on system with bash - then there's no preference.
+>
+>  “＆>”是专属于“bash”的东西。 因此，如果你有移植脚本的打算，就不会用这种方法。 但是，如果您100％确定您的脚本只在具有bash的系统上运行。那就没有什么问题。
+>
+> Here's an example with `dash` , the Debian Amquist Shell which is Ubuntu's default.
+>
+> ```bsh
+> $ grep "YOLO" * &> /dev/null
+> $ grep: Desktop: Is a directory
+> grep: Documents: Is a directory
+> grep: Downloads: Is a directory
+> grep: Music: Is a directory
+> grep: Pictures: Is a directory
+> grep: Public: Is a directory
+> grep: Templates: Is a directory
+> grep: Videos: Is a directory
+> grep: YOLO: Is a directory
+> grep: bin: Is a directory
+> ```
+>
+> As you can see, stderr is not being redirected。你可以看到标准错误没有被重定向【失败了】
+>
+> To address your edits in the question, you can use if statement to check $SHELL variable and change redirects accordingly
+>
+> But for most cases `> file 2>&1` should work。而`> file 2>&1` 大多数情况都是OK的
+>
+> ------
+>
+> In more technical terms, the form `[integer]>&word` is called [Duplicating Output File Descriptor](http://pubs.opengroup.org/onlinepubs/009695399/utilities/xcu_chap02.html#tag_02_07_06), and is a feature specified by POSIX Shell Command Language standard, which is supported by most POSIX-compliant and Brourne-like shells.
+>
+> See also [What does & mean exactly in output redirection?](https://askubuntu.com/a/1031663/295286)
+
+来自：[What is the differences between &> and 2>&1](https://askubuntu.com/questions/635065/what-is-the-differences-between-and-21)
 
 ### 数学运算
 
