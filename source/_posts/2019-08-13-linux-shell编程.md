@@ -475,7 +475,7 @@ readonly myUrl
     任何字符都会原样输出，在其中使用**变量是无效的**。
     字符串中**不能出现单引号**，即使对单引号进行转义也不行。
 
-2.  由双引号`"` "包围的字符串：
+2.  由双引号`" "`包围的字符串：
     如果其中包含了某个变量，那么该**变量会被解析**（得到该变量的值），而不是原样输出。
     字符串中**可以出现双引号**，只要它被转义了就行。
 
@@ -558,6 +558,20 @@ unset my_variable
 ```
 
 在处理**全局环境变量**时，如果你是在子进程中删除了一个全局环境变量， 这只对子进程有效。该全局环境变量在**父进程中依然可用**。
+
+#### 变量默认值
+
+参数设置默认值${var:-default}
+
+`var=${var1:-default}` 当var1不存在时，使用default作为默认值
+
+```bash
+serverparm=$1
+servername=${serverparm:-"/home/test/tomcat-server1"}
+servernum=${serverparm:-34}   # 默认值是34哦
+echo $servername
+echo $servernum
+```
 
 
 
@@ -712,6 +726,23 @@ ${#file} 可得到 27 ，因为/dir1/dir2/dir3/my.file.txt 是27个字节
 ```
 
 [参考来源](https://www.jb51.net/article/64804.htm)
+
+#### let
+
+et 命令是 BASH 中用于计算的工具，用于执行一个或多个表达式，变量计算中不需要加上`$`来表示变量。如果表达式中包含了空格或其他特殊字符，则必须引起来。
+
+实例：
+
+```bash
+# !/bin/bash
+
+let no++
+let no--
+let no+=10，let no-=20 # 分别等同于 let no=no+10，let no=no-20
+let a=5+4
+let b=9-3 
+echo $a $b
+```
 
 
 
@@ -1337,6 +1368,23 @@ then
 fi
 ```
 
+#### let
+
+et 命令是 BASH 中用于计算的工具，用于执行一个或多个表达式，变量计算中不需要加上`$`来表示变量。如果表达式中包含了空格或其他特殊字符，则必须引起来。
+
+实例：
+
+```bash
+# !/bin/bash
+
+let no++
+let no--
+let no+=10，let no-=20 # 分别等同于 let no=no+10，let no=no-20
+let a=5+4
+let b=9-3 
+echo $a $b
+```
+
 
 
 ### 退出脚本
@@ -1604,7 +1652,7 @@ MyVar="How long is this?" ; expr length "$MyVar"    # 注意 mac 中并没有 le
 | `file1 -nt file2` | 如果文件 `file1` 比 `file2` 新（根据修改日期），或 `file1` 存在而 `file2` 不存在，返回真值 |
 | `file1 -ot file2` | 如果文件 `file1` 比 `file2` 旧（根据修改日期），或 `file1` 不存在而 `file2` 存在 |
 
-判断文件存在并不为空的脚本
+判断**文件存在并不为空**的脚本
 
 ```shell
 File="TestFile1"
@@ -2288,6 +2336,17 @@ __base="$(basename ${__file} .sh)"
 __root="$(cd "$(dirname "${__dir}")" && pwd)" # <-- change this as it depends on your app
 
 arg1="${1:-}"
+
+# 显示执行进展
+echo -e '##################################【第1步:xxx:开始】###################################################'
+echo -e '##################################【第1步:xxx:完成】###################################################\n'
+
+# 对于耗时的任务，最好复用本地文件
+if [[ !-f ${file} ]];then
+	sh xxx.sh
+else
+	echo "复用已存在的${file}"
+if
 ```
 
 
