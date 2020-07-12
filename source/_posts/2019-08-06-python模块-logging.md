@@ -81,6 +81,18 @@ logging.error("error")
 logging.critical("critical")
 ```
 
+自定义**屏幕输出的logger**。如果想在不同文件中使用不同 logger，就需要创建一个新的 logger。
+
+```python
+import logging
+
+logger = logging.getLogger('name') # 创建logger
+logger.setLevel(logging.DEBUG)     # 设置等级
+std_err = logging.StreamHandler()  # 创建handler
+std_err.setFormatter(logging.Formatter("%(name)s:%(asctime)s-%(levelname)s: %(message)s"))       # handler定义输出格式
+logger.addHandler(std_err)         # 将handler添加到logger
+```
+
 
 
 #### 关于 basicConfig 说明
