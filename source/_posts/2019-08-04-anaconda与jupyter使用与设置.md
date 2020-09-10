@@ -25,6 +25,10 @@ jupyter 使用介绍、与 anaconda 的虚拟环境结合 、右键打开配置
 
 1. [清华镜像站下载](https://mirrors.tuna.tsinghua.edu.cn/anaconda/archive/?C=M&O=D) 或者[清华镜像站anaconda首页](https://mirrors.tuna.tsinghua.edu.cn/help/anaconda/) 或者[anaconda官网](https://www.anaconda.com/distribution/)(比较慢)
 
+    下面是每个anaconda对应的Python版本图
+
+    ![anaconda版本记录](./anaconda版本记录.png)
+
 2. 对于 **windows 安装**时，把Anaconda加入环境变量，这涉及到能否直接在cmd中使用conda、jupyter、ipython等命令，推荐打勾。如果没有打钩，可在后续加入下面这些路径（如果目录不同，请修改为对应的安装目录）：
 
     ```
