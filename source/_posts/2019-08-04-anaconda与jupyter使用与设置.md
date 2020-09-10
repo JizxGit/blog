@@ -38,9 +38,13 @@ jupyter 使用介绍、与 anaconda 的虚拟环境结合 、右键打开配置
 3. 配置镜像地址，否则从官方网站下载、升级文件太慢
 
     ```bash
+    conda config --show channels   				# 列出现有的镜像频道
     conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
     conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
-    conda config --set show_channel_urls yes
+    conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch/ # 为pytorch而加
+    conda config --set show_channel_urls yes   # 下载时显示文件来源
+    conda config --remove channels 镜像链接     # 删除指定的镜像
+    conda clean- i 									  # 清除索引缓存
     ```
 
 4. 推荐在默认环境下更新所有的包。打开 Anaconda Prompt （或者 Mac 下的终端），键入`conda upgrade —all`
@@ -71,7 +75,7 @@ conda search search_term                    # 如果不知道要找的包的确�
 ```bash
 # 创建、删除环境，记得替换 env_name 为自定义的环境名称
 conda create -n env_name python=3.4 pandas  # 创建环境 ，-n 是指名称，后面可以跟一些想要安装的库
-conda env remove -n env_name --all          # 删除指定的环境
+conda env remove -n env_name                # 删除指定的环境
 conda create -n new_env --clone old_name    # 克隆环境，实现重命名
 
 # 激活/退出环境
