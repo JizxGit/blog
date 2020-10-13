@@ -42,7 +42,7 @@ jupyter 使用介绍、与 anaconda 的虚拟环境结合 、右键打开配置
 3. 配置镜像地址，否则从官方网站下载、升级文件太慢
 
     ```bash
-    conda config --show channels   				# 列出现有的镜像频道
+    conda config --show-sources   				# 列出现有的镜像频道
     conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
     conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
     conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch/ # 为pytorch而加
