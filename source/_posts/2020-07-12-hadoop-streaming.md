@@ -5,6 +5,10 @@ tags:
 categories:
   - hadoop
 date: 2020-07-12 10:30:50
+music:
+ server: netease   # netease, tencent, kugou, xiami, baidu
+ type: song        # song, playlist, album, search, artist
+ id: 16846091
 ---
 <Excerpt in index | 首页摘要> 
 
